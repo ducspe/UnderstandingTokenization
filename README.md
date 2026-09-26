@@ -1,10 +1,26 @@
-# UnderstandingTokenization
+<h1 align="center">Understanding Tokenization</h1>
 
-Code and notebooks for understanding tokenization and byte pair encoding (BPE), supplementing the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop.
+<p align="center">
+  <img src="extra_material/SymbolsAndTokensIntro.png" alt="Introductory text split into colored tokens" />
+  <br />
+  <em>Created using the "gpt-4 tokenizer" in <a href="https://tiktokenizer.vercel.app/?model=gpt-4">Tiktokenizer</a>, which splits this text into 236 tokens.</em>
+</p>
 
-A Transformer works with numbers. The tokenizer is the step that turns text into token IDs before those IDs are mapped to embeddings. This repository explores how that step works, starting with a small implementation you can follow line by line.
+### Before diving into tokenization, you may want to explore the Transformer architecture with [Transformer Explainer](https://poloclub.github.io/transformer-explainer/).
 
-Start with [BPE_Tokenizer_Notebook.ipynb](BPE_Tokenizer_Notebook.ipynb), then explore the Python classes and run the comparison script. Familiarity with Python lists, dictionaries, and loops is enough to begin.
+<p align="center">
+  <img src="extra_material/ProbabilitiesOfTokensIllustration.png" alt="A Transformer processing input tokens and predicting probabilities for the next token" />
+  <br />
+  <em>Created using <a href="https://poloclub.github.io/transformer-explainer/">Transformer Explainer</a>. Try your own text to see how the model processes tokens and predicts the next token.</em>
+</p>
+
+## About this repository
+
+This repository supplements the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop with code and a guided notebook for exploring tokenization and byte pair encoding (BPE).
+
+A Transformer works with numbers. A tokenizer converts text into token IDs, which the model then maps to embeddings.
+
+Start with [BPE_Tokenizer_Notebook.ipynb](BPE_Tokenizer_Notebook.ipynb), where you’ll build a small BPE tokenizer step by step. Then explore the Python classes and run the comparison script to see how different approaches tokenize the same text. Familiarity with Python lists, dictionaries, and loops is enough to begin.
 
 ## Repository overview
 
