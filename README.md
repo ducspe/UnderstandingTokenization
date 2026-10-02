@@ -16,11 +16,15 @@
 
 ## About this repository
 
-This repository supplements the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop with code and a guided notebook for exploring tokenization and byte pair encoding (BPE).
+This repository supplements the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop with a presentation, code, and a guided notebook for exploring tokenization and byte pair encoding (BPE).
 
 A Transformer works with numbers. A tokenizer converts text into token IDs, which the model then maps to embeddings.
 
 Start with [BPE_Tokenizer_Notebook.ipynb](BPE_Tokenizer_Notebook.ipynb), where you’ll build a small BPE tokenizer step by step. Then explore the Python classes and run the comparison script to see how different approaches tokenize the same text. Familiarity with Python lists, dictionaries, and loops is enough to begin.
+
+## Presentation
+
+For more context, check out the presentation **“How Do Language Models See Text? A Primer on Tokenization”**, available as a [PDF](extra_material/LLM_Tokenization_Presentation_Final.pdf) for browser viewing or [PowerPoint](extra_material/LLM_Tokenization_Presentation_Final.pptx) for download. The PowerPoint includes speaker notes with additional references.
 
 ## Repository overview
 
@@ -256,6 +260,27 @@ python -m src.compare_merges --all-tokens
 ```
 
 Both commands replace the same report. Differences measure **merge order**, not speed or quality. GPT-4's positions come from its pretrained rules, with different training data and a much larger vocabulary.
+
+## Extend the Transformer workshop with BPE
+
+The [Understanding Transformers workshop](https://github.com/ducspe/understanding_transformers_workshop) uses a character tokenizer in `mini_gpt.ipynb`: each character gets its own token ID. As a follow-up exercise, explore what changes when you use the larger pieces of text learned by BPE. You can choose from the three tokenizer implementations provided here:
+
+- [BasicBPETokenizer](src/basic_bpe.py) learns merges across the full byte sequence.
+- [RegexBPETokenizer](src/regex_bpe.py) adds regex boundaries that restrict where merges happen.
+- [GPT4TokenizerWrapper](src/gpt4_tokenizer_wrapper.py) loads pretrained `cl100k_base` rules, so you do not train this tokenizer yourself.
+
+Our comparison script trains the first two on the supplied Wikipedia article about Shakespeare and saves their `.model` files in `tokenizer_outputs/`. You can reuse those trained tokenizers to encode the plays from the transformer workshop. **Tokenizer training and language-model training can use different texts:** the tokenizer learns how to split text into pieces, while mini-GPT learns to predict which piece comes next.
+
+Most of the mini-GPT notebook can stay the same. The main changes are:
+
+1. **Replace the character mapping.** Use your trained or loaded tokenizer's `encode` and `decode` methods in place of the notebook's character-based functions.
+2. **Update the vocabulary size.** For our two trained BPE tokenizers, set `vocab_size = len(tokenizer.vocab)`. The notebook already uses this value to size its embedding table and output layer.
+3. **Rebuild the data and train a fresh model.** Encode the workshop's training and validation text with the same tokenizer, then create the model and optimizer again and train. Token IDs now refer to different pieces of text, so the model needs to learn these new meanings.
+4. **Start generation with an encoded prompt.** Replace the all-zero initial context with the token IDs for any non-empty text prompt. A single space or newline is enough; an empty string produces no starting tokens. Use the same tokenizer to decode the generated sequence.
+
+The attention blocks and training loop can remain unchanged. Start with one of the small, 512-token BPE tokenizers from the comparison. The pretrained wrapper is a more demanding extension because its much larger vocabulary increases the model size, and using special tokens requires accounting for their IDs.
+
+Compare how many tokens represent the same passage, how much text fits in the same context window, and how the generated text changes. Fewer tokens do not automatically mean better generation, and loss per token is measured over different units when you change tokenizers.
 
 ## Try it yourself
 
