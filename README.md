@@ -3,7 +3,7 @@
 <p align="center">
   <img src="extra_material/SymbolsAndTokensIntro.png" alt="Introductory text split into colored tokens" />
   <br />
-  <em>Created using the "gpt-4 tokenizer" in <a href="https://tiktokenizer.vercel.app/?model=gpt-4">Tiktokenizer</a>, which splits this text into 236 tokens.</em>
+  <em>Created using the "gpt-4 tokenizer" in <a href="https://tiktokenizer.vercel.app/?model=gpt-4">Tiktokenizer</a>, which splits this text into 243 tokens.</em>
 </p>
 
 ### Before diving into tokenization, you may want to explore the Transformer architecture with [Transformer Explainer](https://poloclub.github.io/transformer-explainer/).
