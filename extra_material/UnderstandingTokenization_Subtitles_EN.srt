@@ -3,574 +3,1463 @@
 How do language models see text?
 
 2
-00:00:02,100 --> 00:00:08,437
-Not as letters, and not as words. They see tokens: small pieces of text, each one mapped to a number.
+00:00:02,100 --> 00:00:04,195
+Not as letters, and not as words.
 
 3
-00:00:08,767 --> 00:00:19,069
-This video walks through the tokenization primer: how tokens are created, why they sometimes behave in surprising ways, and which tools you can use to work with them.
+00:00:04,235 --> 00:00:08,437
+They see tokens: small pieces of
+text, each one mapped to a number.
 
 4
-00:00:20,267 --> 00:00:28,487
-Many of the strange behaviours of large language models start with tokenization. Here are four examples that we will come back to.
+00:00:08,767 --> 00:00:13,652
+This video walks through the tokenization
+primer: how tokens are created,
 
 5
-00:00:28,833 --> 00:00:42,454
-Letter counting. A token can contain several letters, so character-level tasks are less direct for the model. GPT-4, for example, has incorrectly reported two r's in strawberry instead of three.
+00:00:13,692 --> 00:00:16,139
+why they sometimes behave
+in surprising ways,
 
 6
-00:00:42,800 --> 00:00:51,696
-Arithmetic. A number such as 12345 may be split into 123 and 45, rather than into individual digits.
+00:00:16,179 --> 00:00:19,069
+and which tools you can
+use to work with them.
 
 7
-00:00:52,033 --> 00:01:00,050
-Languages. Equivalent messages can require different numbers of tokens, and that affects how much of the context window they use.
+00:00:20,267 --> 00:00:25,622
+Many of the strange behaviours of large
+language models start with tokenization.
 
 8
-00:01:00,367 --> 00:01:06,580
-And programming. The way whitespace is tokenized affects how much code fits into the context window.
+00:00:25,662 --> 00:00:28,487
+Here are four examples
+that we will come back to.
 
 9
-00:01:07,767 --> 00:01:12,334
-Where does the tokenizer fit? It sits between raw text and the language model.
+00:00:28,833 --> 00:00:29,933
+Letter counting.
 
 10
-00:01:12,667 --> 00:01:20,029
-Encoding turns a text string into a sequence of token IDs. That sequence is what the model actually receives.
+00:00:29,973 --> 00:00:32,538
+A token can contain several letters,
 
 11
-00:01:20,367 --> 00:01:25,337
-The model answers with token IDs as well, and decoding turns them back into text.
+00:00:32,578 --> 00:00:36,063
+so character-level tasks are
+less direct for the model.
 
 12
-00:01:25,667 --> 00:01:35,167
-The tokenizer is trained separately, on its own set of documents. Training uses the byte pair encoding algorithm, and it is a one-time procedure.
+00:00:36,103 --> 00:00:42,454
+GPT-4, for example, has incorrectly reported
+two r's in strawberry instead of three.
 
 13
-00:01:35,500 --> 00:01:42,468
-The result is a vocabulary and a list of merges. Once we have those two, we can both encode and decode.
+00:00:42,800 --> 00:00:43,805
+Arithmetic.
 
 14
-00:01:42,800 --> 00:01:50,115
-The language model has its own training dataset, which is much larger than the one typically used to train the tokenizer.
+00:00:43,845 --> 00:00:49,690
+A number such as 12345 may
+be split into 123 and 45,
 
 15
-00:01:51,300 --> 00:01:54,916
-Here is a brief history of byte pair encoding, in three steps.
+00:00:49,730 --> 00:00:51,696
+rather than into individual digits.
 
 16
-00:01:55,233 --> 00:02:08,832
-In 1994, Philip Gage introduced it as a compression algorithm. It repeatedly replaces the most frequent pair of adjacent bytes with a single unused byte, which gives a more compact representation.
+00:00:52,033 --> 00:00:53,068
+Languages.
 
 17
-00:02:09,167 --> 00:02:26,633
-In 2016, Sennrich, Haddow and Birch adapted BPE for subword tokenization. Their version merges characters and character sequences into reusable pieces. This helps neural machine translation models represent rare and unseen words.
+00:00:53,108 --> 00:00:56,823
+Equivalent messages can require
+different numbers of tokens,
 
 18
-00:02:26,967 --> 00:02:44,303
-And in 2019, GPT-2 used byte-level BPE for language modeling. It starts from the 256 possible byte values and learns larger pieces. This way it can encode any UTF-8 text without an unknown-character token.
+00:00:56,863 --> 00:01:00,050
+and that affects how much of
+the context window they use.
 
 19
-00:02:45,500 --> 00:02:48,104
-How does byte pair encoding create new tokens?
+00:01:00,367 --> 00:01:01,352
+And programming.
 
 20
-00:02:48,433 --> 00:02:53,328
-Let's train a tiny tokenizer on this text: hug, hug, hug, pug, pug.
+00:01:01,392 --> 00:01:06,580
+The way whitespace is tokenized affects how
+much code fits into the context window.
 
 21
-00:02:53,667 --> 00:02:58,492
-First, we split every word into single characters. Each block is one token.
+00:01:07,767 --> 00:01:12,334
+Where does the tokenizer fit? It sits
+between raw text and the language model.
 
 22
-00:02:58,833 --> 00:03:03,249
-We process each word separately, so a merge never crosses a word boundary.
+00:01:12,667 --> 00:01:16,807
+Encoding turns a text string
+into a sequence of token IDs.
 
 23
-00:03:03,867 --> 00:03:08,569
-The vocabulary starts with just four characters: h, u, g and p.
+00:01:16,847 --> 00:01:20,029
+That sequence is what the
+model actually receives.
 
 24
-00:03:08,900 --> 00:03:11,474
-Now we count every pair of neighbouring tokens.
+00:01:20,367 --> 00:01:25,337
+The model answers with token IDs as well,
+and decoding turns them back into text.
 
 25
-00:03:11,700 --> 00:03:13,924
-h followed by u appears three times.
+00:01:25,667 --> 00:01:29,832
+The tokenizer is trained separately,
+on its own set of documents.
 
 26
-00:03:14,167 --> 00:03:15,879
-p followed by u, twice.
+00:01:29,872 --> 00:01:35,167
+Training uses the byte pair encoding
+algorithm, and it is a one-time procedure.
 
 27
-00:03:16,100 --> 00:03:18,465
-And u followed by g, five times.
+00:01:35,500 --> 00:01:38,585
+The result is a vocabulary
+and a list of merges.
 
 28
-00:03:18,733 --> 00:03:23,663
-That is the most frequent pair, so we merge it into a single new token: ug.
+00:01:38,625 --> 00:01:42,468
+Once we have those two, we
+can both encode and decode.
 
 29
-00:03:24,000 --> 00:03:30,011
-Then we repeat. h followed by ug appears three times. p followed by ug, only twice.
+00:01:42,800 --> 00:01:45,880
+The language model has
+its own training dataset,
 
 30
-00:03:30,300 --> 00:03:32,187
-So h and ug merge into hug.
+00:01:45,920 --> 00:01:50,115
+which is much larger than the one
+typically used to train the tokenizer.
 
 31
-00:03:32,600 --> 00:03:38,474
-One more round. The only pair left is p and ug, with two occurrences. It becomes pug.
+00:01:51,300 --> 00:01:54,916
+Here is a brief history of byte
+pair encoding, in three steps.
 
 32
-00:03:39,333 --> 00:03:47,641
-Three merges later, the vocabulary has grown from four characters to seven tokens, and every word in our text is a single token.
+00:01:55,233 --> 00:02:00,033
+In 1994, Philip Gage introduced
+it as a compression algorithm.
 
 33
-00:03:47,967 --> 00:03:53,999
-That is the core idea of byte pair encoding: frequent patterns get compact representations.
+00:02:00,073 --> 00:02:06,233
+It repeatedly replaces the most
+frequent pair of adjacent bytes
+with a single unused byte,
 
 34
-00:03:55,463 --> 00:04:01,193
-The merges depend entirely on the training data. So how does that data shape the tokenizer?
+00:02:06,273 --> 00:02:08,832
+which gives a more compact representation.
 
 35
-00:04:01,530 --> 00:04:09,793
-First, the tokenizer and the language model can use different datasets, and tokenizer training typically requires much less text.
+00:02:09,167 --> 00:02:15,717
+In 2016, Sennrich, Haddow and Birch
+adapted BPE for subword tokenization.
 
 36
-00:04:10,130 --> 00:04:17,323
-Second, frequent patterns get compact representations. The training mix shapes which pieces enter the vocabulary.
+00:02:15,757 --> 00:02:21,022
+Their version merges characters and
+character sequences into reusable pieces.
 
 37
-00:04:17,663 --> 00:04:25,269
-Third, language balance matters. English-heavy data can favour compact English representations over other languages.
+00:02:21,062 --> 00:02:26,633
+This helps neural machine translation
+models represent rare and unseen words.
 
 38
-00:04:25,597 --> 00:04:36,227
-Code and formatting matter too. The training mix influences how whitespace is encoded, and it can favour formats such as YAML over JSON, or the other way around.
+00:02:26,967 --> 00:02:32,977
+And in 2019, GPT-2 used byte-level
+BPE for language modeling.
 
 39
-00:04:36,563 --> 00:04:48,308
-Finally, vocabulary choices have lasting effects. The vocabulary usually stays fixed while the language model is trained. And fewer tokens leave more room in the context window.
+00:02:33,017 --> 00:02:38,857
+It starts from the 256 possible byte
+values and learns larger pieces.
 
 40
-00:04:49,497 --> 00:05:01,038
-Let's look at a real tokenizer, starting with numbers. This is Tiktokenizer, a web tool that shows how OpenAI models split text. Every coloured block is one token.
+00:02:38,897 --> 00:02:44,303
+This way it can encode any UTF-8 text
+without an unknown-character token.
 
 41
-00:05:01,363 --> 00:05:16,161
-Take the sum 1234 plus 5678. With the GPT-4 tokenizer, 1234 becomes two tokens: 123 and 4. And 5678 becomes 567 and 8.
+00:02:45,500 --> 00:02:48,104
+How does byte pair encoding
+create new tokens?
 
 42
-00:05:16,497 --> 00:05:28,558
-Now a longer sum. 112345 splits into 112 and 345. The digits 1, 2, 3 are still there, but they no longer form a token of their own.
+00:02:48,433 --> 00:02:53,328
+Let's train a tiny tokenizer on
+this text: hug, hug, hug, pug, pug.
 
 43
-00:05:28,897 --> 00:05:36,180
-So the same digits end up in different tokens, depending on their neighbours. Numbers split into tokens of variable length.
+00:02:53,667 --> 00:02:58,492
+First, we split every word into single
+characters. Each block is one token.
 
 44
-00:05:37,363 --> 00:05:51,496
-Here is the same effect at scale, for the tokenizer of GPT-2 and GPT-3. The figure comes from a blog post by Beren Millidge, and it covers the integers from 0 to 9999.
+00:02:58,833 --> 00:03:02,123
+In this example, we join
+pieces of the same word,
 
 45
-00:05:51,830 --> 00:05:59,634
-Each cell is one integer. Moving one cell to the right advances by one, and moving one row down advances by one hundred.
+00:03:02,163 --> 00:03:04,666
+but never across the spaces between words.
 
 46
-00:05:59,963 --> 00:06:05,364
-The colour shows how a number is split. Yellow means that the entire number is one token.
+00:03:05,333 --> 00:03:10,378
+The vocabulary starts with just
+four characters: h, u, g and p.
 
 47
-00:06:05,697 --> 00:06:11,680
-Red means one digit, then three digits: 2249 becomes 2 and 249.
+00:03:10,418 --> 00:03:12,653
+They get the IDs 1 to 4.
 
 48
-00:06:11,997 --> 00:06:18,171
-Green means two digits, then two digits: 2250 becomes 22 and 50.
+00:03:13,000 --> 00:03:15,574
+Now we count every pair
+of neighbouring tokens.
 
 49
-00:06:18,497 --> 00:06:24,541
-And blue means three digits, then one digit: 2251 becomes 225 and 1.
+00:03:15,800 --> 00:03:18,024
+h followed by u appears three times.
 
 50
-00:06:24,863 --> 00:06:34,027
-Three neighbouring numbers, three different splits. The blog post is titled "Integer tokenization is insane", and it is worth reading in full.
+00:03:18,267 --> 00:03:19,979
+p followed by u, twice.
 
 51
-00:06:35,197 --> 00:06:43,261
-This brings us back to letter counting, sometimes called LLM dyslexia. Ask a model how many r letters strawberry has.
+00:03:20,200 --> 00:03:22,565
+And u followed by g, five times.
 
 52
-00:06:43,597 --> 00:06:51,584
-At the start of a line, the GPT-4 tokenizer splits strawberry into three tokens: str, aw and berry.
+00:03:22,833 --> 00:03:27,713
+That is the most frequent pair, so we
+merge it into a single new token: ug.
 
 53
-00:06:51,930 --> 00:06:55,368
-With a space in front, the same word is one single token.
+00:03:27,753 --> 00:03:29,735
+It gets the next ID, 5.
 
 54
-00:06:55,697 --> 00:06:59,971
-Same word, different IDs. The model sees token IDs, not letters.
+00:03:30,067 --> 00:03:36,078
+Then we repeat. h followed by ug appears
+three times. p followed by ug, only twice.
 
 55
-00:07:00,297 --> 00:07:08,478
-For such a question, an agentic LLM can write and run a short piece of code that splits the word into letters and counts them.
+00:03:36,367 --> 00:03:39,344
+So h and ug merge into hug, with ID 6.
 
 56
-00:07:08,797 --> 00:07:18,077
-It is important to develop an intuition about when to ask the model to do things via code, and when to trust its outputs without additional tools.
+00:03:39,633 --> 00:03:44,528
+One more round. The only pair left
+is p and ug, with two occurrences.
 
 57
-00:07:19,263 --> 00:07:25,580
-Not all languages are tokenized equally. Compare two greetings with the GPT-4 tokenizer.
+00:03:44,568 --> 00:03:46,861
+It becomes pug, with ID 7.
 
 58
-00:07:25,930 --> 00:07:28,661
-The English greeting, hello, is a single token.
+00:03:47,233 --> 00:03:52,548
+Three merges later, the vocabulary has
+grown from four characters to seven tokens,
 
 59
-00:07:28,997 --> 00:07:32,116
-The Romanian greeting, bună ziua, requires five.
+00:03:52,588 --> 00:03:55,541
+and every word in our
+text is a single token.
 
 60
-00:07:32,463 --> 00:07:41,430
-English dominates online text, so both the language model and its tokenizer see more of it, and English ends up tokenized more compactly.
+00:03:55,867 --> 00:03:58,677
+That is the core idea
+of byte pair encoding:
 
 61
-00:07:41,763 --> 00:07:53,061
-This matters because the context window is measured in tokens. Reasoning in a language that requires more tokens for equivalent content can fill the context window more quickly.
+00:03:58,717 --> 00:04:01,899
+frequent patterns get
+compact representations.
 
 62
-00:07:54,230 --> 00:07:59,019
-Source code contains a lot of whitespace, so let's tokenize two lines of Python.
+00:04:03,363 --> 00:04:06,443
+The merges depend entirely
+on the training data.
 
 63
-00:07:59,363 --> 00:08:10,806
-With the GPT-2 tokenizer, the snippet takes 24 tokens. Look at the indentation: each space is encoded separately, which results in longer token sequences.
+00:04:06,483 --> 00:04:09,093
+So how does that data shape the tokenizer?
 
 64
-00:08:11,130 --> 00:08:21,194
-The GPT-4 tokenizer needs only 19 tokens for the same code. Here, several spaces are merged together and treated as a single token.
+00:04:09,430 --> 00:04:13,885
+First, the tokenizer and the language
+model can use different datasets,
 
 65
-00:08:21,530 --> 00:08:26,993
-Fewer tokens for the same code means that more code fits within the same token budget.
+00:04:13,925 --> 00:04:17,693
+and tokenizer training typically
+requires much less text.
 
 66
-00:08:28,163 --> 00:08:35,269
-Before text reaches the tokenizer, it has to become bytes. A very common way to do that is UTF-8.
+00:04:18,030 --> 00:04:21,635
+Second, frequent patterns
+get compact representations.
 
 67
-00:08:35,597 --> 00:08:42,332
-Every character has a Unicode code point, and UTF-8 converts that code point into one to four bytes.
+00:04:21,675 --> 00:04:25,223
+The training mix shapes which
+pieces enter the vocabulary.
 
 68
-00:08:42,663 --> 00:09:00,638
-The first bits of each byte reveal its role. A byte starting with 0 is a complete character on its own. The prefixes 110, 1110 and 11110 start a sequence of two, three or four bytes. And every continuation byte starts with 10.
+00:04:25,563 --> 00:04:27,893
+Third, language balance matters.
 
 69
-00:09:00,963 --> 00:09:14,545
-There are other encoding schemes, like UTF-16 and UTF-32. UTF-32 is fixed length, whereas UTF-8 is variable length, which can result in shorter byte sequences.
+00:04:27,933 --> 00:04:33,169
+English-heavy data can favour compact English
+representations over other languages.
 
 70
-00:09:14,863 --> 00:09:23,131
-One of the major advantages of UTF-8 is that it is backwards compatible with ASCII, which is a much simpler encoding of text.
+00:04:33,497 --> 00:04:35,662
+Code and formatting matter too.
 
 71
-00:09:24,330 --> 00:09:31,818
-Because of this structure, not all byte sequences are valid UTF-8. Take the character é.
+00:04:35,702 --> 00:04:39,282
+The training mix influences
+how whitespace is encoded,
 
 72
-00:09:32,163 --> 00:09:42,465
-Its code point is U+00E9, and it is encoded as two bytes, with the decimal values 195 and 169.
+00:04:39,322 --> 00:04:44,127
+and it can favour formats such as YAML
+over JSON, or the other way around.
 
 73
-00:09:42,797 --> 00:09:53,601
-The first byte begins with 110, which indicates the start of a two-byte sequence. The second begins with 10, which identifies it as a continuation byte.
+00:04:44,463 --> 00:04:48,068
+Finally, vocabulary choices
+have lasting effects.
 
 74
-00:09:53,930 --> 00:10:08,087
-By contrast, the byte 128 cannot be decoded on its own. In binary it is 10000000. Its 10 prefix marks it as a continuation byte, so a preceding start byte is required.
+00:04:48,108 --> 00:04:52,693
+The vocabulary usually stays fixed
+while the language model is trained.
 
 75
-00:10:08,430 --> 00:10:21,025
-This matters for tokenizers, because a UTF-8 character may span several tokens. That is why the decode function joins the bytes of all tokens first, and only then decodes them into text.
+00:04:52,733 --> 00:04:56,208
+And fewer tokens leave more
+room in the context window.
 
 76
-00:10:21,363 --> 00:10:33,299
-If invalid byte sequences remain, errors="replace" displays the Unicode replacement character in their place. So when you see lots of these symbols, the bytes could not be decoded correctly.
+00:04:57,397 --> 00:05:00,757
+Let's look at a real tokenizer,
+starting with numbers.
 
 77
-00:10:34,497 --> 00:10:42,773
-Some merges should never take place. This can be enforced with a regular expression. Here is the one from the GPT-2 encoder.
+00:05:00,797 --> 00:05:06,672
+This is Tiktokenizer, a web tool that
+shows how OpenAI models split text.
 
 78
-00:10:43,097 --> 00:10:55,601
-The regex splits text into smaller chunks before BPE is applied. It recognizes English contractions, groups of letters, groups of numbers, punctuation and symbols, and whitespace.
+00:05:06,712 --> 00:05:08,938
+Every coloured block is one token.
 
 79
-00:10:55,930 --> 00:11:04,298
-For example, the sentence "I'm buying 12 apples!" becomes six chunks. Notice that the space stays attached to the word that follows it.
+00:05:09,263 --> 00:05:13,043
+Take the sum 1234 plus 5678.
 
 80
-00:11:04,630 --> 00:11:10,249
-BPE then processes each chunk separately, and cannot merge across these boundaries.
+00:05:13,083 --> 00:05:20,353
+With the GPT-4 tokenizer, 1234
+becomes two tokens: 123 and 4.
 
 81
-00:11:11,430 --> 00:11:27,907
-The GPT-4 tokenizer uses a new regular expression. Its encoding is called cl100k_base, and it is the tokenizer used by the original GPT-4, GPT-4 Turbo and GPT-3.5 Turbo.
+00:05:20,393 --> 00:05:24,061
+And 5678 becomes 567 and 8.
 
 82
-00:11:28,230 --> 00:11:38,975
-Let's run both patterns on the same example text: underscore hello, I'M with a capital M, buying 12345, an exclamation mark and a line break.
+00:05:24,397 --> 00:05:31,012
+Now a longer sum. 112345
+splits into 112 and 345.
 
 83
-00:11:39,297 --> 00:11:46,301
-The GPT-2 pattern gives nine chunks. The new pattern gives eight, and each difference shows a rule that changed.
+00:05:31,052 --> 00:05:36,458
+The digits 1, 2, 3 are still there, but
+they no longer form a token of their own.
 
 84
-00:11:46,630 --> 00:11:52,755
-English contractions are now case-insensitive, so both 'm and 'M are recognized.
+00:05:36,797 --> 00:05:41,182
+So the same digits end up in different
+tokens, depending on their neighbours.
 
 85
-00:11:53,097 --> 00:12:03,226
-Numbers are split into groups of one to three digits: 12345 becomes 123 and 45. And the space before a number is separated.
+00:05:41,222 --> 00:05:44,080
+Numbers split into tokens
+of variable length.
 
 86
-00:12:03,563 --> 00:12:12,561
-Words can include a preceding symbol, so underscore hello can stay together. Previously, only a preceding space could attach to a group of letters.
+00:05:45,263 --> 00:05:49,923
+Here is the same effect at scale, for
+the tokenizer of GPT-2 and GPT-3.
 
 87
-00:12:12,897 --> 00:12:21,986
-And punctuation can include following line breaks, so the exclamation mark and the line break stay together, whereas GPT-2 separates them.
+00:05:49,963 --> 00:05:54,268
+The figure comes from a blog
+post by Beren Millidge,
 
 88
-00:12:23,163 --> 00:12:31,751
-Besides ordinary tokens, a tokenizer also has special tokens. The GPT-4 tokenizer defines five of them.
+00:05:54,308 --> 00:05:59,396
+and it covers the integers from 0 to 9999.
 
 89
-00:12:32,097 --> 00:12:35,656
-End of text marks the end of a document or text sequence.
+00:05:59,730 --> 00:06:01,590
+Each cell is one integer.
 
 90
-00:12:35,997 --> 00:12:42,741
-Three tokens support filling in the middle. Imagine the sentence "The cat sat on the mat", with the word sat missing.
+00:06:01,630 --> 00:06:04,590
+Moving one cell to the
+right advances by one,
 
 91
-00:12:43,063 --> 00:12:54,507
-FIM prefix says: here is the text before the gap. FIM suffix says: here is the text after the gap. And FIM middle says: now generate the missing text.
+00:06:04,630 --> 00:06:07,534
+and moving one row down
+advances by one hundred.
 
 92
-00:12:54,830 --> 00:13:04,073
-So the model receives the prefix token, The cat, the suffix token, on the mat, and the middle token. Then it generates the missing middle: sat.
+00:06:07,863 --> 00:06:10,043
+The colour shows how a number is split.
 
 93
-00:13:04,397 --> 00:13:11,599
-The fifth token, end of prompt, marks the end of the supplied prompt, after which the model generates its completion.
+00:06:10,083 --> 00:06:13,264
+Yellow means that the
+entire number is one token.
 
 94
-00:13:11,930 --> 00:13:16,759
-The fill-in-the-middle approach is described in a paper by Bavarian and colleagues.
+00:06:13,597 --> 00:06:19,580
+Red means one digit, then three
+digits: 2249 becomes 2 and 249.
 
 95
-00:13:17,930 --> 00:13:25,398
-How does the tokenizer treat these special strings? Here, each special token is written next to the same word as plain text.
+00:06:19,897 --> 00:06:26,071
+Green means two digits, then two
+digits: 2250 becomes 22 and 50.
 
 96
-00:13:25,730 --> 00:13:33,488
-Note how each special token is a single block with a single ID, while the plain word next to it is split into ordinary pieces.
+00:06:26,397 --> 00:06:32,441
+And blue means three digits, then
+one digit: 2251 becomes 225 and 1.
 
 97
-00:13:33,830 --> 00:13:44,581
-Special tokens are indivisible markers that structure messages and tool calls, for example a message marker and a call marker. These two names are only illustrative.
+00:06:32,763 --> 00:06:35,693
+Three neighbouring numbers,
+three different splits.
 
 98
-00:13:44,930 --> 00:13:49,346
-Tool names, arguments and content typically use ordinary tokens.
+00:06:35,733 --> 00:06:39,973
+The blog post is titled "Integer
+tokenization is insane",
 
 99
-00:13:49,663 --> 00:13:55,125
-The model learns the format during training, while external software executes the tool calls.
+00:06:40,013 --> 00:06:41,927
+and it is worth reading in full.
 
 100
-00:13:56,297 --> 00:14:03,681
-Special tokens also structure conversations. Here is a short chat as the GPT-4 tokenizer sees it.
+00:06:43,097 --> 00:06:48,027
+This brings us back to letter counting,
+sometimes called LLM dyslexia.
 
 101
-00:14:04,030 --> 00:14:12,773
-<|im_start|> marks the beginning of a message. <|im_sep|> separates the message header from its content. And <|im_end|> marks the end of a message.
+00:06:48,067 --> 00:06:51,161
+Ask a model how many r
+letters strawberry has.
 
 102
-00:14:13,097 --> 00:14:28,287
-Role labels such as system, user and assistant identify who is speaking. In this example, these labels are ordinary text enclosed by special tokens, so the model learns to interpret them as roles when they appear in that position.
+00:06:51,497 --> 00:06:53,249
+At the start of a line,
 
 103
-00:14:28,630 --> 00:14:34,784
-The sequence ends with an open assistant header. From this point, the model generates its reply.
+00:06:53,289 --> 00:06:59,484
+the GPT-4 tokenizer splits strawberry
+into three tokens: str, aw and berry.
 
 104
-00:14:35,963 --> 00:14:47,222
-To work with these tokenizers in Python, you can use tiktoken, a fast BPE tokenizer for OpenAI's models. It is installed with pip install tiktoken.
+00:06:59,830 --> 00:07:03,268
+With a space in front, the
+same word is one single token.
 
 105
-00:14:47,563 --> 00:14:58,230
-You load an encoding by name, or you ask for the encoding that belongs to a specific model. Then encode turns text into token IDs, and decode turns them back.
+00:07:03,597 --> 00:07:07,871
+Same word, different IDs. The
+model sees token IDs, not letters.
 
 106
-00:14:58,563 --> 00:15:06,489
-According to its documentation, tiktoken is between three and six times faster than a comparable open source tokenizer.
+00:07:08,197 --> 00:07:12,637
+For such a question, an agentic LLM can
+write and run a short piece of code
 
 107
-00:15:07,663 --> 00:15:15,433
-You can also extend tiktoken. You create your own Encoding object exactly the way you want, and simply pass it around.
+00:07:12,677 --> 00:07:16,378
+that splits the word into
+letters and counts them.
 
 108
-00:15:15,763 --> 00:15:26,426
-In this example from the documentation, a new encoding called cl100k_im reuses the pattern and the merges of cl100k_base.
+00:07:16,697 --> 00:07:22,487
+It is important to develop an
+intuition about when to ask the
+model to do things via code,
 
 109
-00:15:26,763 --> 00:15:35,279
-It then adds two special tokens, <|im_start|> and <|im_end|>. So you can add more special tokens afterwards, each with a new ID.
+00:07:22,527 --> 00:07:25,977
+and when to trust its outputs
+without additional tools.
 
 110
-00:15:36,463 --> 00:15:42,942
-A new token in the tokenizer is only the first step. Adding a token to a pretrained model takes four.
+00:07:27,163 --> 00:07:29,863
+Not all languages are tokenized equally.
 
 111
-00:15:43,263 --> 00:15:45,706
-One: add the new token to the tokenizer.
+00:07:29,903 --> 00:07:33,480
+Compare two greetings
+with the GPT-4 tokenizer.
 
 112
-00:15:46,030 --> 00:15:51,236
-Two: expand the input embedding matrix and the output vocabulary projection.
+00:07:33,830 --> 00:07:36,561
+The English greeting,
+hello, is a single token.
 
 113
-00:15:51,563 --> 00:15:53,741
-Three: initialize the new parameters.
+00:07:36,897 --> 00:07:40,016
+The Romanian greeting,
+bună ziua, requires five.
 
 114
-00:15:54,063 --> 00:15:57,439
-Four: fine-tune on examples containing the new token.
+00:07:40,363 --> 00:07:42,648
+English dominates online text,
 
 115
-00:15:57,763 --> 00:16:10,542
-Adding special tokens can support adapting a base model for chat, or introducing tool-use formats in chat and coding models. Fine-tuning teaches the model to interpret and generate these formats.
+00:07:42,688 --> 00:07:46,588
+so both the language model and
+its tokenizer see more of it,
 
 116
-00:16:11,730 --> 00:16:14,340
-The second library to know is SentencePiece.
+00:07:46,628 --> 00:07:49,830
+and English can end up being
+tokenized more compactly.
 
 117
-00:16:14,663 --> 00:16:24,182
-SentencePiece supports both tokenizer training and inference, whereas tiktoken focuses primarily on inference with an already trained tokenizer.
+00:07:50,163 --> 00:07:54,443
+This matters because the context
+window is measured in tokens.
 
 118
-00:16:24,530 --> 00:16:31,770
-It supports multiple algorithms, including BPE and Unigram, whereas tiktoken focuses on BPE.
+00:07:54,483 --> 00:07:57,276
+Reasoning in a language
+that requires more tokens
 
 119
-00:16:32,097 --> 00:16:43,783
-SentencePiece is used by models such as Llama 2, Mistral 7B and Mixtral 8x7B. Llama 3 moved from SentencePiece to a tiktoken-based tokenizer.
+00:07:57,316 --> 00:08:01,461
+for equivalent content can fill
+the context window more quickly.
 
 120
-00:16:44,963 --> 00:16:48,782
-A SentencePiece vocabulary contains four types of tokens.
+00:08:02,630 --> 00:08:07,419
+Source code contains a lot of whitespace,
+so let's tokenize two lines of Python.
 
 121
-00:16:49,130 --> 00:17:01,328
-Special tokens are reserved tokens with predefined functions: <unk> for unknown tokens, <s> for the start of a sentence, </s> for the end of a sentence, and optionally <pad> for padding.
+00:08:07,763 --> 00:08:12,543
+With the GPT-2 tokenizer,
+the snippet takes 24 tokens.
 
 122
-00:17:01,663 --> 00:17:11,024
-Byte tokens represent individual bytes. They are used as a fallback for characters not covered by the normal vocabulary, when byte_fallback is True.
+00:08:12,583 --> 00:08:16,548
+Look at the indentation: each
+space is encoded separately,
 
 123
-00:17:11,363 --> 00:17:19,838
-Merge tokens are subword tokens, learned by repeatedly merging frequently occurring neighbouring symbols during BPE training.
+00:08:16,588 --> 00:08:19,206
+which results in longer token sequences.
 
 124
-00:17:20,163 --> 00:17:36,907
-And individual codepoint tokens represent single Unicode characters, retained according to the specified character_coverage, for example 0.995. If a codepoint is too rare to fall within that coverage, it is not added to the vocabulary.
+00:08:19,530 --> 00:08:24,740
+The GPT-4 tokenizer needs only
+19 tokens for the same code.
 
 125
-00:17:38,097 --> 00:17:43,546
-Whitespace needs care. Look at these two sentences in the GPT-4 tokenizer.
+00:08:24,780 --> 00:08:29,594
+Here, several spaces are merged
+together and treated as a single token.
 
 126
-00:17:43,863 --> 00:17:52,847
-At the start of the text, dog is one token. After the word "the", it appears with a preceding space, and that is a different token with a different ID.
+00:08:29,930 --> 00:08:35,393
+Fewer tokens for the same code
+means that more code fits
+within the same token budget.
 
 127
-00:17:53,197 --> 00:17:57,261
-SentencePiece represents whitespace explicitly, with a marker symbol.
+00:08:36,563 --> 00:08:40,373
+Before text reaches the tokenizer,
+it has to become bytes.
 
 128
-00:17:57,597 --> 00:18:07,310
-If add_dummy_prefix is True, a whitespace marker is also added at the start of the input. This treats the first word like a word preceded by a space.
+00:08:40,413 --> 00:08:43,669
+A very common way to do that is UTF-8.
 
 129
-00:18:07,630 --> 00:18:13,795
-That reduces the need to learn separate token variants for the same word, with and without a preceding space.
+00:08:43,997 --> 00:08:46,487
+Every character has a Unicode code point,
 
 130
-00:18:14,963 --> 00:18:18,032
-Let's put tiktoken and SentencePiece side by side.
+00:08:46,527 --> 00:08:50,732
+and UTF-8 converts that code
+point into one to four bytes.
 
 131
-00:18:18,363 --> 00:18:25,788
-Basic representation: tiktoken works on UTF-8 bytes, SentencePiece on Unicode text and pieces.
+00:08:51,063 --> 00:08:53,558
+The first bits of each
+byte reveal its role.
 
 132
-00:18:26,130 --> 00:18:36,286
-Tokenization methods: tiktoken uses BPE. SentencePiece offers BPE, Unigram, character-level and word-level tokenization.
+00:08:53,598 --> 00:08:57,443
+A byte starting with 0 is a
+complete character on its own.
 
 133
-00:18:36,630 --> 00:18:44,758
-Pre-tokenization: tiktoken applies regex constraints. SentencePiece uses its own normalization and whitespace scheme.
+00:08:57,483 --> 00:09:05,953
+The prefixes 110, 1110 and 11110 start
+a sequence of two, three or four bytes.
 
 134
-00:18:45,097 --> 00:18:55,586
-Training: tiktoken primarily provides prebuilt encodings, although an educational trainer exists. SentencePiece is a full tokenizer-training toolkit.
+00:09:05,993 --> 00:09:09,038
+And every continuation
+byte starts with 10.
 
 135
-00:18:55,930 --> 00:19:03,799
-Whitespace: in tiktoken it depends on the regex and on BPE. SentencePiece uses an explicit whitespace symbol.
+00:09:09,363 --> 00:09:14,963
+There are other encoding
+schemes, like UTF-16 and UTF-32.
 
 136
-00:19:04,130 --> 00:19:13,427
-And unknown characters: tiktoken has a byte-based representation. SentencePiece uses the <unk> token, or an optional byte fallback.
+00:09:15,003 --> 00:09:19,753
+UTF-32 is fixed length, whereas
+UTF-8 is variable length,
 
 137
-00:19:14,597 --> 00:19:16,445
-Let's close with five takeaways.
+00:09:19,793 --> 00:09:22,945
+which can result in
+shorter byte sequences.
 
 138
-00:19:16,763 --> 00:19:23,654
-Tokens are the model's units of text. The tokenizer converts text into a sequence of numerical IDs.
+00:09:23,263 --> 00:09:29,008
+One of the major advantages of UTF-8 is
+that it is backwards compatible with ASCII,
 
 139
-00:19:23,997 --> 00:19:31,990
-BPE builds tokens by merging frequent pairs. Its training data shapes which patterns get compact representations.
+00:09:29,048 --> 00:09:31,531
+which is a much simpler encoding of text.
 
 140
-00:19:32,330 --> 00:19:39,184
-Fewer tokens mean more room in the context window. Different languages and formats use that space differently.
+00:09:32,730 --> 00:09:37,240
+Because of this structure, not all
+byte sequences are valid UTF-8.
 
 141
-00:19:39,530 --> 00:19:51,771
-Token boundaries can be surprising. Spaces affect the split, numbers break into chunks, and one character can span multiple tokens when its UTF-8 bytes fall into different tokens.
+00:09:37,280 --> 00:09:40,218
+Take the character é.
 
 142
-00:19:52,097 --> 00:20:00,069
-And special tokens provide structure. The model learns the format during training, while external software executes tool calls.
+00:09:40,563 --> 00:09:45,988
+Its code point is U+00E9, and
+it is encoded as two bytes,
 
 143
-00:20:01,263 --> 00:20:12,834
-All sources are listed on the last slide of the deck: the papers, the code and libraries, the tools and articles, and Andrej Karpathy's video "Let's build the GPT Tokenizer".
+00:09:46,028 --> 00:09:50,865
+with the decimal values 195 and 169.
 
 144
-00:20:13,163 --> 00:20:18,468
-To explore further, open Tiktokenizer and try your own text. Thanks for watching.
+00:09:51,197 --> 00:09:56,892
+The first byte begins with 110, which
+indicates the start of a two-byte sequence.
+
+145
+00:09:56,932 --> 00:10:02,001
+The second begins with 10, which
+identifies it as a continuation byte.
+
+146
+00:10:02,330 --> 00:10:10,425
+By contrast, the byte 128 cannot be decoded
+on its own. In binary it is 10000000.
+
+147
+00:10:10,465 --> 00:10:13,960
+Its 10 prefix marks it
+as a continuation byte,
+
+148
+00:10:14,000 --> 00:10:16,487
+so a preceding start byte is required.
+
+149
+00:10:16,830 --> 00:10:22,875
+This matters for tokenizers, because a
+UTF-8 character may span several tokens.
+
+150
+00:10:22,915 --> 00:10:27,195
+That is why the decode function
+joins the bytes of all tokens first,
+
+151
+00:10:27,235 --> 00:10:29,425
+and only then decodes them into text.
+
+152
+00:10:29,763 --> 00:10:32,298
+When decoding with errors="replace",
+
+153
+00:10:32,338 --> 00:10:38,203
+invalid UTF-8 sequences are replaced
+with the Unicode replacement character.
+
+154
+00:10:38,243 --> 00:10:39,915
+So when you see lots of these symbols,
+
+155
+00:10:39,955 --> 00:10:44,137
+the post-processing pipeline could
+not decode the bytes correctly.
+
+156
+00:10:45,330 --> 00:10:47,625
+Some merges should never take place.
+
+157
+00:10:47,665 --> 00:10:52,490
+For example, we might want to keep a word
+separate from the punctuation after it.
+
+158
+00:10:52,530 --> 00:10:57,470
+Regular expressions let us specify which
+parts of the text should stay separate.
+
+159
+00:10:57,510 --> 00:11:00,543
+Here is the one from the GPT-2 encoder.
+
+160
+00:11:00,930 --> 00:11:05,610
+The regex splits text into smaller
+chunks before BPE is applied.
+
+161
+00:11:05,650 --> 00:11:09,370
+It recognizes English
+contractions, groups of letters,
+
+162
+00:11:09,410 --> 00:11:13,434
+groups of numbers, punctuation
+and symbols, and whitespace.
+
+163
+00:11:13,763 --> 00:11:18,433
+For example, the sentence "I'm buying
+12 apples!" becomes six chunks.
+
+164
+00:11:18,473 --> 00:11:22,131
+Notice that the space stays attached
+to the word that follows it.
+
+165
+00:11:22,463 --> 00:11:28,083
+BPE then processes each chunk separately,
+and cannot merge across these boundaries.
+
+166
+00:11:29,263 --> 00:11:33,278
+The GPT-4 tokenizer uses
+a new regular expression.
+
+167
+00:11:33,318 --> 00:11:37,845
+Its encoding is called cl100k_base,
+
+168
+00:11:37,885 --> 00:11:45,740
+and it is the tokenizer used by the original
+GPT-4, GPT-4 Turbo and GPT-3.5 Turbo.
+
+169
+00:11:46,063 --> 00:11:50,673
+Let's run both patterns on the same
+example text: underscore hello,
+
+170
+00:11:50,713 --> 00:11:56,788
+I'M with a capital M, reading 12345,
+an exclamation mark and a line break.
+
+171
+00:11:57,130 --> 00:11:59,945
+The GPT-2 pattern gives nine chunks.
+
+172
+00:11:59,985 --> 00:12:04,135
+The new pattern gives eight, and each
+difference shows a rule that changed.
+
+173
+00:12:04,463 --> 00:12:10,588
+English contractions are now case-insensitive,
+so both 'm and 'M are recognized.
+
+174
+00:12:10,930 --> 00:12:18,540
+Numbers are split into groups of one to
+three digits: 12345 becomes 123 and 45.
+
+175
+00:12:18,580 --> 00:12:21,059
+And the space before a
+number is separated.
+
+176
+00:12:21,397 --> 00:12:26,142
+Words can include a preceding symbol,
+so underscore hello can stay together.
+
+177
+00:12:26,182 --> 00:12:30,395
+Previously, only a preceding space
+could attach to a group of letters.
+
+178
+00:12:30,730 --> 00:12:33,850
+And punctuation can include
+following line breaks,
+
+179
+00:12:33,890 --> 00:12:37,245
+so the exclamation mark and
+the line break stay together,
+
+180
+00:12:37,285 --> 00:12:39,820
+whereas GPT-2 separates them.
+
+181
+00:12:40,997 --> 00:12:45,817
+Besides ordinary tokens, a
+tokenizer also has special tokens.
+
+182
+00:12:45,857 --> 00:12:49,584
+The GPT-4 tokenizer defines five of them.
+
+183
+00:12:49,930 --> 00:12:53,490
+End of text marks the end of
+a document or text sequence.
+
+184
+00:12:53,830 --> 00:12:56,120
+Three tokens support
+filling in the middle.
+
+185
+00:12:56,160 --> 00:13:00,574
+Imagine the sentence "The cat sat on
+the mat", with the word sat missing.
+
+186
+00:13:00,897 --> 00:13:04,637
+FIM prefix says: here is
+the text before the gap.
+
+187
+00:13:04,677 --> 00:13:08,522
+FIM suffix says: here is
+the text after the gap.
+
+188
+00:13:08,562 --> 00:13:12,341
+And FIM middle says: now
+generate the missing text.
+
+189
+00:13:12,663 --> 00:13:15,678
+So the model receives the
+prefix token, The cat,
+
+190
+00:13:15,718 --> 00:13:18,983
+the suffix token, on the
+mat, and the middle token.
+
+191
+00:13:19,023 --> 00:13:21,906
+Then it generates the missing middle: sat.
+
+192
+00:13:22,230 --> 00:13:26,665
+The fifth token, end of prompt, marks
+the end of the supplied prompt,
+
+193
+00:13:26,705 --> 00:13:29,433
+after which the model
+generates its completion.
+
+194
+00:13:29,763 --> 00:13:34,592
+The fill-in-the-middle approach is described
+in a paper by Bavarian and colleagues.
+
+195
+00:13:35,763 --> 00:13:38,518
+How does the tokenizer treat
+these special strings?
+
+196
+00:13:38,558 --> 00:13:43,231
+Here, each special token is written
+next to the same word as plain text.
+
+197
+00:13:43,563 --> 00:13:47,563
+Note how each special token is a
+single block with a single ID,
+
+198
+00:13:47,603 --> 00:13:51,321
+while the plain word next to it
+is split into ordinary pieces.
+
+199
+00:13:51,663 --> 00:13:56,848
+Special tokens are indivisible markers
+that structure messages and tool calls,
+
+200
+00:13:56,888 --> 00:13:59,928
+for example a message
+marker and a call marker.
+
+201
+00:13:59,968 --> 00:14:02,414
+These two names are only illustrative.
+
+202
+00:14:02,763 --> 00:14:07,179
+Tool names, arguments and content
+typically use ordinary tokens.
+
+203
+00:14:07,497 --> 00:14:09,857
+The model learns the
+format during training,
+
+204
+00:14:09,897 --> 00:14:12,958
+while external software
+executes the tool calls.
+
+205
+00:14:14,130 --> 00:14:17,240
+Special tokens also
+structure conversations.
+
+206
+00:14:17,280 --> 00:14:21,515
+Here is a short chat as the
+GPT-4 tokenizer sees it.
+
+207
+00:14:21,863 --> 00:14:24,473
+‹|im_start|› marks the
+beginning of a message.
+
+208
+00:14:24,513 --> 00:14:27,878
+‹|im_sep|› separates the message
+header from its content.
+
+209
+00:14:27,918 --> 00:14:30,607
+And ‹|im_end|› marks the end of a message.
+
+210
+00:14:30,930 --> 00:14:36,170
+Role labels such as system, user and
+assistant identify who is speaking.
+
+211
+00:14:36,210 --> 00:14:40,673
+In this example, these labels are
+ordinary text enclosed by special tokens,
+
+212
+00:14:40,713 --> 00:14:46,121
+so the model learns to interpret them as
+roles when they appear in that position.
+
+213
+00:14:46,463 --> 00:14:49,428
+The sequence ends with an
+open assistant header.
+
+214
+00:14:49,468 --> 00:14:52,617
+From this point, the model
+generates its reply.
+
+215
+00:14:53,797 --> 00:14:56,863
+To work with these tokenizers in Python,
+
+216
+00:14:56,903 --> 00:15:01,847
+you can use tiktoken, a fast BPE
+tokenizer for OpenAI's models.
+
+217
+00:15:01,887 --> 00:15:05,055
+It is installed with pip install tiktoken.
+
+218
+00:15:05,397 --> 00:15:07,152
+You load an encoding by name,
+
+219
+00:15:07,192 --> 00:15:11,092
+or you ask for the encoding that
+belongs to a specific model.
+
+220
+00:15:11,132 --> 00:15:16,063
+Then encode turns text into token
+IDs, and decode turns them back.
+
+221
+00:15:16,397 --> 00:15:18,337
+According to its documentation,
+
+222
+00:15:18,377 --> 00:15:24,322
+tiktoken is between three and
+six times faster than a
+comparable open source tokenizer.
+
+223
+00:15:25,497 --> 00:15:27,777
+You can also extend tiktoken.
+
+224
+00:15:27,817 --> 00:15:31,647
+You create your own Encoding
+object exactly the way you want,
+
+225
+00:15:31,687 --> 00:15:33,266
+and simply pass it around.
+
+226
+00:15:33,597 --> 00:15:35,832
+In this example from the documentation,
+
+227
+00:15:35,872 --> 00:15:44,259
+a new encoding called cl100k_im reuses the
+pattern and the merges of cl100k_base.
+
+228
+00:15:44,597 --> 00:15:48,842
+It then adds two special tokens,
+‹|im_start|› and ‹|im_end|›.
+
+229
+00:15:48,882 --> 00:15:53,113
+So you can add more special tokens
+afterwards, each with a new ID.
+
+230
+00:15:54,297 --> 00:15:57,812
+A new token in the tokenizer
+is only the first step.
+
+231
+00:15:57,852 --> 00:16:00,776
+Adding a token to a
+pretrained model takes four.
+
+232
+00:16:01,097 --> 00:16:03,540
+One: add the new token to the tokenizer.
+
+233
+00:16:03,863 --> 00:16:09,123
+Two: expand the input embedding matrix
+and the output vocabulary projection.
+
+234
+00:16:09,163 --> 00:16:13,693
+Each one grows from V × d to (V+1) × d,
+
+235
+00:16:13,733 --> 00:16:18,024
+where V is the vocabulary size
+and d is the vector size.
+
+236
+00:16:18,363 --> 00:16:22,603
+The new row of the embedding matrix
+is a vector for the new token.
+
+237
+00:16:22,643 --> 00:16:27,743
+The new row of the output projection holds
+the weights for predicting the new token,
+
+238
+00:16:27,783 --> 00:16:30,588
+so there is one more possible next token.
+
+239
+00:16:30,628 --> 00:16:34,645
+The transformer blocks in between
+keep the same matrix sizes.
+
+240
+00:16:34,963 --> 00:16:38,656
+Three: initialize the new
+parameters, that is, the new rows.
+
+241
+00:16:38,997 --> 00:16:42,372
+Four: fine-tune on examples
+containing the new token.
+
+242
+00:16:42,697 --> 00:16:46,787
+Adding special tokens can support
+adapting a base model for chat,
+
+243
+00:16:46,827 --> 00:16:51,037
+or introducing tool-use formats
+in chat and coding models.
+
+244
+00:16:51,077 --> 00:16:55,475
+Fine-tuning teaches the model to
+interpret and generate these formats.
+
+245
+00:16:56,663 --> 00:16:59,273
+The second library to
+know is SentencePiece.
+
+246
+00:16:59,597 --> 00:17:03,632
+SentencePiece supports both
+tokenizer training and inference,
+
+247
+00:17:03,672 --> 00:17:09,115
+whereas tiktoken focuses primarily on
+inference with an already trained tokenizer.
+
+248
+00:17:09,463 --> 00:17:11,969
+It supports multiple algorithms,
+
+249
+00:17:12,009 --> 00:17:16,703
+including BPE and Unigram,
+whereas tiktoken focuses on BPE.
+
+250
+00:17:17,030 --> 00:17:23,730
+SentencePiece is used by models such as
+Llama 2, Mistral 7B and Mixtral 8x7B.
+
+251
+00:17:23,770 --> 00:17:28,716
+Llama 3 moved from SentencePiece
+to a tiktoken-based tokenizer.
+
+252
+00:17:29,897 --> 00:17:35,428
+What is in a SentencePiece BPE vocabulary?
+It contains four types of tokens.
+
+253
+00:17:35,763 --> 00:17:39,773
+Special tokens are reserved
+tokens with predefined functions:
+
+254
+00:17:39,813 --> 00:17:41,145
+‹unk› for unknown tokens,
+
+255
+00:17:41,185 --> 00:17:43,793
+‹s› for the start of a sentence,
+
+256
+00:17:43,833 --> 00:17:47,962
+‹/s› for the end of a sentence,
+and optionally ‹pad› for padding.
+
+257
+00:17:48,297 --> 00:17:50,997
+Byte tokens represent individual bytes.
+
+258
+00:17:51,037 --> 00:17:55,912
+They are used as a fallback for characters
+not covered by the normal vocabulary,
+
+259
+00:17:55,952 --> 00:17:57,658
+when byte_fallback is True.
+
+260
+00:17:57,997 --> 00:18:00,457
+Merge tokens are subword tokens,
+
+261
+00:18:00,497 --> 00:18:06,472
+learned by repeatedly merging
+frequently occurring neighbouring
+symbols during BPE training.
+
+262
+00:18:06,797 --> 00:18:11,297
+And single-character tokens represent
+individual Unicode characters,
+
+263
+00:18:11,337 --> 00:18:17,742
+retained according to the specified
+character_coverage, for example 0.995.
+
+264
+00:18:17,782 --> 00:18:21,292
+If a codepoint is too rare to
+fall within that coverage,
+
+265
+00:18:21,332 --> 00:18:23,521
+it is not added to the vocabulary.
+
+266
+00:18:24,697 --> 00:18:30,146
+Whitespace needs care. Look at these
+two sentences in the GPT-4 tokenizer.
+
+267
+00:18:30,463 --> 00:18:33,403
+At the start of the
+text, dog is one token.
+
+268
+00:18:33,443 --> 00:18:36,763
+After the word "the", it
+appears with a preceding space,
+
+269
+00:18:36,803 --> 00:18:39,447
+and that is a different
+token with a different ID.
+
+270
+00:18:39,797 --> 00:18:43,861
+SentencePiece represents whitespace
+explicitly, with a marker symbol.
+
+271
+00:18:44,197 --> 00:18:46,187
+If add_dummy_prefix is True,
+
+272
+00:18:46,227 --> 00:18:49,867
+a whitespace marker is also
+added at the start of the input.
+
+273
+00:18:49,907 --> 00:18:53,910
+This treats the first word like
+a word preceded by a space.
+
+274
+00:18:54,230 --> 00:18:58,340
+That reduces the need to learn separate
+token variants for the same word,
+
+275
+00:18:58,380 --> 00:19:00,395
+with and without a preceding space.
+
+276
+00:19:01,563 --> 00:19:04,632
+Let's put tiktoken and
+SentencePiece side by side.
+
+277
+00:19:04,963 --> 00:19:08,973
+Basic representation: tiktoken
+works on UTF-8 bytes,
+
+278
+00:19:09,013 --> 00:19:12,388
+SentencePiece on Unicode text and pieces.
+
+279
+00:19:12,730 --> 00:19:16,640
+Tokenization methods: tiktoken uses BPE.
+
+280
+00:19:16,680 --> 00:19:22,886
+SentencePiece offers BPE, Unigram,
+character-level and word-level tokenization.
+
+281
+00:19:23,230 --> 00:19:27,310
+Pre-tokenization: tiktoken
+applies regex constraints.
+
+282
+00:19:27,350 --> 00:19:31,358
+SentencePiece uses its own
+normalization and whitespace scheme.
+
+283
+00:19:31,697 --> 00:19:35,602
+Training: tiktoken primarily
+provides prebuilt encodings,
+
+284
+00:19:35,642 --> 00:19:38,362
+although an educational trainer exists.
+
+285
+00:19:38,402 --> 00:19:42,186
+SentencePiece is a full
+tokenizer-training toolkit.
+
+286
+00:19:42,530 --> 00:19:47,135
+Whitespace: in tiktoken it
+depends on the regex and on BPE.
+
+287
+00:19:47,175 --> 00:19:50,399
+SentencePiece uses an
+explicit whitespace symbol.
+
+288
+00:19:50,730 --> 00:19:55,475
+And unknown characters: tiktoken
+has a byte-based representation.
+
+289
+00:19:55,515 --> 00:20:00,027
+SentencePiece uses the ‹unk› token,
+or an optional byte fallback.
+
+290
+00:20:01,197 --> 00:20:03,045
+Let's close with five takeaways.
+
+291
+00:20:03,363 --> 00:20:05,893
+Tokens are the model's units of text.
+
+292
+00:20:05,933 --> 00:20:10,254
+The tokenizer converts text into
+a sequence of numerical IDs.
+
+293
+00:20:10,597 --> 00:20:14,382
+BPE builds tokens by
+merging frequent pairs.
+
+294
+00:20:14,422 --> 00:20:18,590
+Its training data shapes which
+patterns get compact representations.
+
+295
+00:20:18,930 --> 00:20:22,285
+Fewer tokens mean more room
+in the context window.
+
+296
+00:20:22,325 --> 00:20:25,784
+Different languages and formats
+use that space differently.
+
+297
+00:20:26,130 --> 00:20:29,690
+The tokenizer can split
+words in unexpected places.
+
+298
+00:20:29,730 --> 00:20:33,910
+Splits don't always follow
+syllables or familiar word parts.
+
+299
+00:20:33,950 --> 00:20:37,275
+A token can also include
+the space before a word,
+
+300
+00:20:37,315 --> 00:20:42,929
+so "hello" and " hello" may use different
+tokens, depending on the tokenizer.
+
+301
+00:20:43,263 --> 00:20:45,613
+And special tokens provide structure.
+
+302
+00:20:45,653 --> 00:20:48,243
+The model learns the
+format during training,
+
+303
+00:20:48,283 --> 00:20:51,236
+while external software
+executes tool calls.
+
+304
+00:20:52,430 --> 00:20:55,955
+All sources are listed on
+the last slide of the deck:
+
+305
+00:20:55,995 --> 00:20:58,140
+the papers, the code and libraries,
+
+306
+00:20:58,180 --> 00:21:04,001
+the tools and articles, and Andrej Karpathy's
+video "Let's build the GPT Tokenizer".
+
+307
+00:21:04,330 --> 00:21:09,635
+To explore further, open Tiktokenizer and
+try your own text. Thanks for watching.
 
