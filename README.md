@@ -16,19 +16,29 @@
 
 ## About this repository
 
-This repository supplements the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop with a presentation, code, and a guided notebook for exploring tokenization and byte pair encoding (BPE).
+This repository supplements the **[Understanding Transformers](https://github.com/ducspe/understanding_transformers_workshop)** workshop with a video tutorial, a presentation, code, and a guided notebook for exploring tokenization and byte pair encoding (BPE). The workshop uses a character-level tokenizer, where every character is its own token. This repository shows how real language models split text into larger pieces, and why that choice matters.
 
 A Transformer works with numbers. A tokenizer converts text into token IDs, which the model then maps to embeddings.
 
-Start with [BPE_Tokenizer_Notebook.ipynb](BPE_Tokenizer_Notebook.ipynb), where you’ll build a small BPE tokenizer step by step. Then explore the Python classes and run the comparison script to see how different approaches tokenize the same text. Familiarity with Python lists, dictionaries, and loops is enough to begin.
+## Where to start
 
-## Presentation
+| If you want to... | Open | Time |
+| --- | --- | --- |
+| Get the big picture without writing code | The [video tutorial](extra_material/UnderstandingTokenization_VideoTutorial.mp4), with [English subtitles](extra_material/UnderstandingTokenization_Subtitles_EN.srt) | 21 minutes |
+| Build a tokenizer yourself | [BPE_Tokenizer_Notebook.ipynb](BPE_Tokenizer_Notebook.ipynb), after the [setup](#setup) below | about an hour |
+| Keep a reference at hand | The slides as [PDF](extra_material/UnderstandingTokenization.pdf) or [PowerPoint](extra_material/UnderstandingTokenization.pptx) | as needed |
 
-For more context, check out the presentation **“How Do Language Models See Text? A Primer on Tokenization”**, available as a [PDF](extra_material/LLM_Tokenization_Presentation_Final.pdf) for browser viewing or [PowerPoint](extra_material/LLM_Tokenization_Presentation_Final.pptx) for download. The PowerPoint includes speaker notes with additional references.
+If tokenization is new to you, watch the video first. It introduces tokens, byte pair encoding, and the surprising model behaviours that follow from them, using examples you can reproduce in [Tiktokenizer](https://tiktokenizer.vercel.app/?model=gpt-4). Then open the notebook, where you build a small BPE tokenizer step by step; familiarity with Python lists, dictionaries, and loops is enough to begin. Finally, explore the Python classes and run the comparison script to see how different approaches tokenize the same text.
+
+## Video and presentation
+
+The video tutorial **“How Do Language Models See Text? A Primer on Tokenization”** walks through the slides in 21 minutes. You can play the [MP4](extra_material/UnderstandingTokenization_VideoTutorial.mp4) in the browser on GitHub or download it; most video players can load the [subtitle file](extra_material/UnderstandingTokenization_Subtitles_EN.srt) alongside it.
+
+The same presentation is available as a [PDF](extra_material/UnderstandingTokenization.pdf) for browser viewing or as a [PowerPoint](extra_material/UnderstandingTokenization.pptx) for download. The PowerPoint includes speaker notes with additional references, and the last slide lists every paper, library, tool, and article mentioned.
 
 ## Repository overview
 
-The Python modules live in `src/`. The notebook and training article are at the repository root.
+The Python modules live in `src/`. The notebook and training article are at the repository root. The video, slides, and figures are in `extra_material/`, and `tokenizer_outputs/` holds generated example files.
 
 The four core Python files have different roles:
 
@@ -44,6 +54,7 @@ The four core Python files have different roles:
 | [compare_merges.py](src/compare_merges.py) | Compare shared tokens and their merge positions in a readable Markdown table |
 | [william_shakespeare_wikipedia_article.txt](william_shakespeare_wikipedia_article.txt) | Training and evaluation text, with source attribution |
 | [requirements.txt](requirements.txt) | Dependencies for the scripts and a notebook kernel |
+| [extra_material/](extra_material/) | Video tutorial with subtitles, slides as PDF and PowerPoint, and the figures shown above |
 
 ## Setup
 
@@ -65,7 +76,9 @@ python -m venv .tokenizervenv
 python -m pip install -r requirements.txt
 ```
 
-`regex` supplies the regular-expression engine, `tiktoken` supplies the pretrained vocabulary, and `ipykernel` lets the environment run notebook cells.
+`regex` supplies the regular-expression engine, `tiktoken` supplies the pretrained vocabulary, and `ipykernel` lets the environment run notebook cells. The repository was last checked with `tiktoken` 0.14 and `regex` 2026.9.
+
+The notebook uses only the Python standard library and runs offline. The comparison scripts need internet access once, when `tiktoken` downloads the `cl100k_base` vocabulary; it is cached afterwards. If you plan to run them during a workshop on restricted Wi-Fi, run them once beforehand.
 
 Open `BPE_Tokenizer_Notebook.ipynb` in VS Code with its Python and Jupyter extensions, select the `.tokenizervenv` interpreter as the kernel, and run the cells from top to bottom. To use JupyterLab in a browser instead, install it with `python -m pip install jupyterlab` and run `jupyter lab` from the repository directory.
 
@@ -278,7 +291,14 @@ Most of the mini-GPT notebook can stay the same. The main changes are:
 3. **Rebuild the data and train a fresh model.** Encode the workshop's training and validation text with the same tokenizer, then create the model and optimizer again and train. Token IDs now refer to different pieces of text, so the model needs to learn these new meanings.
 4. **Start generation with an encoded prompt.** Replace the all-zero initial context with the token IDs for any non-empty text prompt. A single space or newline is enough; an empty string produces no starting tokens. Use the same tokenizer to decode the generated sequence.
 
-The attention blocks and training loop can remain unchanged. Start with one of the small, 512-token BPE tokenizers from the comparison. The pretrained wrapper is a more demanding extension because its much larger vocabulary increases the model size, and using special tokens requires accounting for their IDs.
+The attention blocks and training loop can remain unchanged. Start with the 512-token `RegexBPETokenizer` from the comparison. Both small tokenizers round-trip the workshop's `input.txt` exactly, but they differ a lot in speed, because the basic tokenizer rescans the entire text for every merge rule while the regex tokenizer works on short chunks:
+
+| Tokenizer | Tokens for the workshop's `input.txt` (1,115,394 characters) | Time to encode |
+| --- | ---: | ---: |
+| `RegexBPETokenizer`, 512 tokens | 635,730 | about 2 seconds |
+| `BasicBPETokenizer`, 512 tokens | 654,995 | about 45 seconds |
+
+Either way, the token sequence is roughly 40% shorter than the character sequence, so the same `block_size` covers more text. The pretrained wrapper is a more demanding extension because its much larger vocabulary increases the model size, and using special tokens requires accounting for their IDs.
 
 Compare how many tokens represent the same passage, how much text fits in the same context window, and how the generated text changes. Fewer tokens do not automatically mean better generation, and loss per token is measured over different units when you change tokenizers.
 
