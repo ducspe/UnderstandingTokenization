@@ -1,5 +1,5 @@
 import tiktoken
-from .regex_bpe import RegexBPETokenizer
+from .regex_bpe import RegexBPETokenizer, GPT4_SPLIT_PATTERN
 
 
 def bpe(mergeable_ranks, token, max_rank):
@@ -32,7 +32,6 @@ def recover_merges(mergeable_ranks):
 
     return merges
 
-GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
 GPT4_SPECIAL_TOKENS = {
     '<|endoftext|>': 100257,
     '<|fim_prefix|>': 100258,

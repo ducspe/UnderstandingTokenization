@@ -2,8 +2,15 @@ import regex as re
 from .tokenizer_base import Tokenizer, get_stats, merge
 
 
+# Both patterns split text into chunks before BPE runs, so merges never cross a chunk boundary.
+# A chunk is a contraction ending ('s, 't, 're, ...), a word together with the space in front
+# of it, a group of digits, a run of punctuation, or whitespace. The GPT-4 pattern also accepts
+# upper-case contractions, lets any symbol precede a word, limits digit groups to three, and
+# keeps line breaks attached to the punctuation before them.
+# GPT-2: https://github.com/openai/gpt-2/blob/master/src/encoder.py
+# GPT-4: https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py
 GPT2_SPLIT_PATTERN = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}++|\p{N}{1,3}+| ?[^\s\p{L}\p{N}]++[\r\n]*+|\s++$|\s*[\r\n]|\s+(?!\S)|\s"""
 
 
 class RegexBPETokenizer(Tokenizer):
